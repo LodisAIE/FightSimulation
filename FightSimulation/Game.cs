@@ -23,15 +23,13 @@ namespace FightSimulation
         Monster thwompus;
         Monster backupWompus;
         Monster unclePhil;
+        Monster[] monsters;
 
         int currentMonsterIndex = 0;
         int currentScene = 0;
 
         public void Run()
         {
-
-            int[] arr = { 1,2,3,4,5 };
-            PrintSmallestAndLargest(arr);
             Start();
 
             while (!gameOver)
@@ -40,14 +38,6 @@ namespace FightSimulation
             }
 
             End();
-        }
-
-        void PrintArray(int[] numArray, int size)
-        {
-            for (int i = 0; i < size; i++)
-            {
-                Console.WriteLine(numArray[i]);
-            }
         }
 
         void Start()
@@ -76,6 +66,8 @@ namespace FightSimulation
             unclePhil.defense = 0;
             unclePhil.health = 1.0f;
 
+            monsters = new Monster[] { wompus, thwompus, backupWompus, unclePhil };
+
             ResetCurrentMonsters();
         }
 
@@ -93,6 +85,9 @@ namespace FightSimulation
             Console.WriteLine("Guhbah fren");
         }
 
+        /// <summary>
+        /// Prints the All Father to the console
+        /// </summary>
         void DisplayUnclePhil()
         {
             Console.Write("\n" +
@@ -158,13 +153,16 @@ namespace FightSimulation
 ":;;;;,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,;ck0KKNNNNNNNNXKXXXXXKK00ko:;,,,,,,cxkl:cxKNNNNNNNNNNNNNXd:;;;;;:::::clllllll\n");
         }
 
+        /// <summary>
+        /// Resets the current fighters to be the first two monsters in the array.
+        /// </summary>
         void ResetCurrentMonsters()
         {
             currentMonsterIndex = 0;
             //Set starting fighters
-            currentMonster1 = GetMonster(currentMonsterIndex);
+            currentMonster1 = monsters[currentMonsterIndex];
             currentMonsterIndex++;
-            currentMonster2 = GetMonster(currentMonsterIndex);
+            currentMonster2 = monsters[currentMonsterIndex];
         }
 
         void UpdateCurrentScene()
@@ -240,67 +238,6 @@ namespace FightSimulation
 
             //Return the player choice
             return choice;
-        }
-
-        void PrintArray(int[] arr)
-        {
-            for (int i = 0; i < arr.Length; i++)
-            {
-                Console.WriteLine(arr[i]);
-            }
-        }
-
-        void PrintSmallestAndLargest(int[] arr)
-        {
-            int largest = arr[0];
-            int smallest = arr[0];
-
-            for (int i = 0; i < arr.Length; i++)
-            {
-                if (arr[i] > largest)
-                {
-                    largest = arr[i];
-                }
-
-                if (arr[i] < smallest)
-                {
-                    smallest = arr[i];
-                }
-            }
-
-            Console.WriteLine("Largest: " + largest);
-            Console.WriteLine("Smallest: " + smallest);
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        void PrintSmallestAndLargestFinished(int[] arr)
-        {
-            int largest = arr[0];
-            int smallest = arr[0];
-
-            for (int i = 0; i < arr.Length; i++)
-            {
-                if (arr[i] > largest)
-                    largest = arr[i];
-                else if (arr[i] < smallest)
-                    smallest = arr[i];
-            }
-
-            Console.WriteLine("Largest: " + largest);
-            Console.WriteLine("Smallest: " + smallest);
         }
 
         /// <summary>
@@ -399,31 +336,52 @@ namespace FightSimulation
             Console.WriteLine(currentMonster1.name + " has taken " + damageTaken);
         }
 
+        bool TryEndSimulation()
+        {
+            bool simulationOver = currentMonsterIndex >= monsters.Length;
+
+            if (simulationOver)
+            {
+                currentScene = 2;
+            }
+
+            return simulationOver;
+        }
+
         /// <summary>
         /// Changes one of the current fighters to be the next in the list 
         /// if it has died. Ends the game if all fighters in the list have been used.
         /// </summary>
         void UpdateCurrentMonsters()
         {
+            //Current Size: 3
+            //Current Index: 3
+
             //If monster 1 has died...
             if (currentMonster1.health <= 0)
             {
                 //...increment the current monster index and swap out the monster
                 currentMonsterIndex++;
-                currentMonster1 = GetMonster(currentMonsterIndex);
+
+                if (TryEndSimulation())
+                {
+                    return;
+                }
+
+                currentMonster1 = monsters[currentMonsterIndex];
             }
             //If monster 2 has died...
             if (currentMonster2.health <= 0)
             {
                 //...increment the current monster index and swap out the monster
                 currentMonsterIndex++;
-                currentMonster2 = GetMonster(currentMonsterIndex);
-            }
-            //If either monster is set to "None" and the last monster has been set...
-            if (currentMonster2.name == "None" || currentMonster1.name == "None" && currentMonsterIndex >= 4)
-            {
-                //...go to the restart menu
-                currentScene = 2;
+
+                if (TryEndSimulation())
+                {
+                    return;
+                }
+
+                currentMonster2 = monsters[currentMonsterIndex];
             }
         }
 
